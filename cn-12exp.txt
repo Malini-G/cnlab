@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+// Function to simulate frame transmission with possible errors
+int sendFrame(int frame, int introduceError) {
+    printf("Sender: Sending Frame %d\n", frame);
+    if (introduceError && (rand() % 2 == 0)) {
+        printf("Receiver: Frame %d received with ERROR.\n", frame);
+        return 0; // Simulate a failed transmission
+    }
+    printf("Receiver: Frame %d received successfully.\n", frame);
+    return 1; // Simulate a successful transmission
+}
+
+// Function to simulate acknowledgment
+int receiveAck(int introduceDelay) {
+    if (introduceDelay && (rand() % 2 == 0)) {
+        printf("Sender: ACK lost or delayed.\n");
+        return 0; // Simulate a lost acknowledgment
+    }
+    printf("Sender: ACK received successfully.\n");
+    return 1; // Simulate a successful acknowledgment
+}
+
+void stopAndWaitProtocol(int frames[], int n, int introduceError, int introduceDelay) {
+    for (int i = 0; i < n; ) {
+        printf("\nProcessing Frame %d...\n", frames[i]);
+        if (sendFrame(frames[i], introduceError)) {
+            if (receiveAck(introduceDelay)) {
+                printf("Frame %d successfully transmitted.\n", frames[i]);
+                i++; // Move to the next frame only if ACK is received
+            } else {
+                printf("Timeout occurred. Resending Frame %d...\n", frames[i]);
+            }
+        } else {
+            printf("Error in transmission. Resending Frame %d...\n", frames[i]);
+        }
+        sleep(1); // Simulate network delay
+    }
+    printf("\nAll frames transmitted successfully!\n");
+}
+
+int main() {
+    int n;
+    printf("Enter the number of frames to transmit: ");
+    scanf("%d", &n);
+
+    int frames[n];
+    for (int i = 0; i < n; i++) {
+        frames[i] = i + 1; // Frame IDs are 1, 2, 3, ...
+    }
+
+    srand(time(NULL));
+
+    printf("\nSimulating Stop-and-Wait Protocol...\n");
+    stopAndWaitProtocol(frames, n, 1, 1);
+
+    return 0;
+}
+
+output
+Enter the number of frames to transmit: 2
+
+Simulating Stop-and-Wait Protocol...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received with ERROR.
+Error in transmission. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received with ERROR.
+Error in transmission. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received with ERROR.
+Error in transmission. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received with ERROR.
+Error in transmission. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received with ERROR.
+Error in transmission. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received successfully.
+Sender: ACK lost or delayed.
+Timeout occurred. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received successfully.
+Sender: ACK lost or delayed.
+Timeout occurred. Resending Frame 1...
+
+Processing Frame 1...
+Sender: Sending Frame 1
+Receiver: Frame 1 received successfully.
+Sender: ACK received successfully.
+Frame 1 successfully transmitted.
+
+Processing Frame 2...
+Sender: Sending Frame 2
+Receiver: Frame 2 received successfully.
+Sender: ACK received successfully.
+Frame 2 successfully transmitted.
+
+All frames transmitted successfully!
